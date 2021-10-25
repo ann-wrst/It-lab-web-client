@@ -6,7 +6,7 @@ class Columns extends Component {
     }
 
     render() {
-        return (<>Columns:</>)
+        return (<div style={{backgroundColor:"red",width:'100%'}}>Columns</div>)
     }
 }
 

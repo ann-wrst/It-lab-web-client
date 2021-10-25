@@ -21,6 +21,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import AddTableModal from "./AddTableModal";
 import {dropDB} from "../services/DatabaseServices";
+import {Link} from 'react-router-dom'
 
 class MenuItem extends Component {
     constructor(props) {
@@ -181,18 +182,26 @@ class MenuItem extends Component {
                                     <ListItemText primary={table}/>
                                 </ListItemButton>
                             </ListItem>
-                            <ListItemButton sx={{pl: 8}}>
-                                <ListItemIcon>
-                                    <ViewColumnSharpIcon/>
-                                </ListItemIcon>
-                                <ListItemText primary="Columns"/>
-                            </ListItemButton>
-                            <ListItemButton sx={{pl: 8}}>
-                                <ListItemIcon>
-                                    <TableRowsSharpIcon/>
-                                </ListItemIcon>
-                                <ListItemText primary="Rows"/>
-                            </ListItemButton></>
+                            <ListItem component={Link} to={{
+                                pathname: `/${this.props.name}/${table}/columns`
+                            }}>
+                                <ListItemButton sx={{pl: 8}}>
+                                    <ListItemIcon>
+                                        <ViewColumnSharpIcon/>
+                                    </ListItemIcon>
+                                    <ListItemText style={{color: 'black'}} primary="Columns"/>
+                                </ListItemButton>
+                            </ListItem>
+                            <ListItem component={Link} to={{
+                                pathname: `/${this.props.name}/${table}/rows`
+                            }}>
+                                <ListItemButton sx={{pl: 8}}>
+                                    <ListItemIcon>
+                                        <TableRowsSharpIcon/>
+                                    </ListItemIcon>
+                                    <ListItemText style={{color: 'black'}} primary="Rows"/>
+                                </ListItemButton>
+                            </ListItem></>
                     ))}
                 </List>
             </Collapse></>)

@@ -6,7 +6,7 @@ class Rows extends Component {
     }
 
     render() {
-        return (<></>)
+        return (<div style={{backgroundColor:"red",width:'100%'}}>Rows</div>)
     }
 }
 
