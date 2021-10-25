@@ -5,7 +5,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import List from "@mui/material/List";
 import Collapse from "@mui/material/Collapse";
-import {getTables} from "../services/TablesServices";
+import {dropTable, getTables} from "../services/TablesServices";
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ViewColumnSharpIcon from '@mui/icons-material/ViewColumnSharp';
 import TableRowsSharpIcon from '@mui/icons-material/TableRowsSharp';
@@ -20,6 +20,7 @@ import TextField from "@material-ui/core/TextField";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import AddTableModal from "./AddTableModal";
+import {dropDB} from "../services/DatabaseServices";
 
 class MenuItem extends Component {
     constructor(props) {
@@ -27,13 +28,18 @@ class MenuItem extends Component {
         this.state = {
             open: false,
             tables: [],
-            confirmDeleteOpen: false,
+            confirmDeleteDBOpen: false,
+            confirmDeleteTableOpen: false,
             db_name: '',
-            openAdd: false
+            openAdd: false,
+            table: undefined
         }
         this.handleClick = this.handleClick.bind(this);
         this.handleOpenAdd = this.handleOpenAdd.bind(this);
         this.handleAddOpenChange = this.handleAddOpenChange.bind(this);
+        this.handleDeleteDBClose = this.handleDeleteDBClose.bind(this);
+        this.handleDeleteTableConfirmation = this.handleDeleteTableConfirmation.bind(this)
+        this.handleDeleteTableClose = this.handleDeleteTableClose.bind(this);
     }
 
     async handleClick(db) {
@@ -64,16 +70,95 @@ class MenuItem extends Component {
         this.setState({openAdd: open});
     }
 
+    handleDeleteDBConfirmation() {
+        this.setState({confirmDeleteDBOpen: true});
+    }
+
+    handleDeleteDBClose() {
+        this.setState({confirmDeleteDBOpen: false});
+    }
+
+    handleDeleteTableConfirmation(table) {
+        this.setState({confirmDeleteTableOpen: true, table: table});
+    }
+
+    handleDeleteTableClose() {
+        this.setState({confirmDeleteTableOpen: false});
+    }
+
+    async deleteDB() {
+        let response = await dropDB(this.props.name);
+        if (!response.success) {
+            //TODO: show error
+        } else {
+            await this.props.fetchDB();
+            this.handleDeleteDBClose();
+        }
+    }
+
+    async deleteTable(table) {
+        let response = await dropTable(this.props.name, table);
+        if (!response.success) {
+            //TODO: show error
+        } else {
+            await this.fetchTables(this.props.name);
+            this.handleDeleteTableClose();
+        }
+    }
+
+    renderDeleteTableConfirm() {
+        return (<Dialog open={this.state.confirmDeleteTableOpen} onClose={() => this.handleDeleteTableClose()}
+                        aria-labelledby="form-dialog-title">
+            <DialogTitle style={{width: '250px'}} id="form-dialog-title"><p style={{fontSize: '18px'}}> Drop
+                table</p>
+            </DialogTitle>
+            <DialogContent>
+                <p>Delete the table?</p>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={this.handleDeleteTableClose} color="primary">
+                    Cancel
+                </Button>
+                <Button onClick={() => this.deleteTable(this.state.table)} color="primary">
+                    Delete
+                </Button>
+            </DialogActions>
+        </Dialog>);
+    }
+
+    renderDeleteDBConfirm() {
+        return (<Dialog open={this.state.confirmDeleteDBOpen} onClose={() => this.handleDeleteDBClose()}
+                        aria-labelledby="form-dialog-title">
+            <DialogTitle id="form-dialog-title"><p style={{fontSize: '18px'}}> Drop
+                database</p>
+            </DialogTitle>
+            <DialogContent>
+                <p>Delete the {this.props.name} database?</p>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={this.handleDeleteDBClose} color="primary">
+                    Cancel
+                </Button>
+                <Button onClick={() => this.deleteDB()} color="primary">
+                    Delete
+                </Button>
+            </DialogActions>
+        </Dialog>);
+    }
+
     render() {
         return (<>
             {this.state.openAdd ?
                 <AddTableModal db={this.props.name} open={this.state.openAdd} onOpenChange={this.handleAddOpenChange}
                                fetchList={() => this.fetchTables(this.props.name)}/> : null}
+            {this.state.confirmDeleteTableOpen ? this.renderDeleteTableConfirm() : null}
+
+            {this.state.confirmDeleteDBOpen ? this.renderDeleteDBConfirm() : null}
             <ListItem secondaryAction={<>
                 <IconButton edge="end" aria-label="comments" onClick={this.handleOpenAdd}>
                     <AddBoxOutlinedIcon/>
                 </IconButton>
-                <IconButton edge="end" aria-label="comments" onClick={this.handleOpenAdd}>
+                <IconButton edge="end" aria-label="comments" onClick={this.handleDeleteDBConfirmation.bind(this)}>
                     <DeleteOutlineRoundedIcon/>
                 </IconButton>
             </>
@@ -86,9 +171,16 @@ class MenuItem extends Component {
             <Collapse in={this.state.open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                     {this.state.tables.map((table) => (<>
-                            <ListItemButton sx={{pl: 4}}>
-                                <ListItemText primary={table}/>
-                            </ListItemButton>
+                            <ListItem secondaryAction={
+                                <IconButton edge="end" aria-label="comments"
+                                            onClick={() => this.handleDeleteTableConfirmation(table)}>
+                                    <DeleteOutlineRoundedIcon/>
+                                </IconButton>
+                            }>
+                                <ListItemButton sx={{pl: 4}}>
+                                    <ListItemText primary={table}/>
+                                </ListItemButton>
+                            </ListItem>
                             <ListItemButton sx={{pl: 8}}>
                                 <ListItemIcon>
                                     <ViewColumnSharpIcon/>

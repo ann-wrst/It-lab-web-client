@@ -137,9 +137,7 @@ class AddTableModal extends Component {
     render() {
         return (<> {
             this.renderCreateTableModal()
-        }
-
-        </>)
+        }</>)
     }
 }
 
