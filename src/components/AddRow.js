@@ -1,6 +1,6 @@
 import {React, Component} from 'react';
 
-class Databases extends Component {
+class AddRow extends Component {
     constructor(props) {
         super(props);
     }
@@ -10,4 +10,4 @@ class Databases extends Component {
     }
 }
 
-export default Databases;
+export default AddRow;

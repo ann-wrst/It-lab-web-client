@@ -182,6 +182,7 @@ class MenuItem extends Component {
                                     <ListItemText primary={table}/>
                                 </ListItemButton>
                             </ListItem>
+                            {console.log(this.props.name, table)}
                             <ListItem component={Link} to={{
                                 pathname: `/${this.props.name}/${table}/columns`
                             }}>
