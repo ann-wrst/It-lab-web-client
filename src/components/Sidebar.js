@@ -11,13 +11,15 @@ import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
+import ErrorSnackbar from "./ErrorSnackbar";
 
 class Sidebar extends Component {
     constructor(props) {
         super(props);
         this.state = {
             open: false,
-            db_list: []
+            db_list: [],
+            error: undefined
         }
         this.fetchDBList = this.fetchDBList.bind(this);
         this.handleOpenAdd = this.handleOpenAdd.bind(this);
@@ -28,10 +30,12 @@ class Sidebar extends Component {
         await this.fetchDBList();
     }
 
+    error;
+
     async fetchDBList() {
         let response = await getDBList();
         if (!response.success) {
-            //TODO: show error
+            this.error = <ErrorSnackbar open={true} message={response?.message}/>;
         } else
             this.setState({db_list: response.data});
     }
@@ -77,7 +81,7 @@ class Sidebar extends Component {
     async createDatabase() {
         let response = await createDB(this.state.db_name);
         if (!response.success) {
-            //TODO: show error
+            this.setState({error: <ErrorSnackbar open={true} message={response?.message}/>});
         } else {
             await this.fetchDBList();
             this.handleCreateClose();
@@ -87,7 +91,9 @@ class Sidebar extends Component {
     render() {
         return <div style={{width: '25%', backgroundColor: "#d5cfe7"}}>
             <div>{this.renderCreateDBModal()}</div>
-            <div style={{display: 'flex', justifyContent:'space-evenly'}}>
+            {this.state.error}
+
+            <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
                 <p style={{display: 'flex'}}>Databases</p>
                 <IconButton style={{display: 'flex'}} edge="end" aria-label="comments" onClick={this.handleOpenAdd}>
                     <AddBoxOutlinedIcon/>

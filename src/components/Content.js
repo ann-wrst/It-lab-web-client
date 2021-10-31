@@ -6,7 +6,7 @@ class Content extends Component {
     }
 
     render() {
-        return (<div style={{backgroundColor:"red",width:'100%'}}/>)
+        return (<div style={{width:'100%'}}/>)
     }
 }
 

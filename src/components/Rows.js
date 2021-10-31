@@ -11,6 +11,8 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import TableContainer from "@mui/material/TableContainer";
 import {getColumns} from "../services/ColumnsServices";
 import {getRows} from "../services/RowsServices";
+import {AddBoxOutlined} from "@material-ui/icons";
+import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 
 class Rows extends Component {
     constructor(props) {
@@ -51,7 +53,11 @@ class Rows extends Component {
 
     render() {
         let rows = this.state.rows || [];
-        return (<div style={{width: '100%', margin: '15px'}}><Typography>Rows</Typography>
+        return (<div style={{width: '100%', margin: '15px'}}>
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    <Typography>Rows</Typography>
+                    <IconButton><AddBoxOutlinedIcon/></IconButton>
+                </div>
                 <div style={{display: 'flex', justifyContent: 'center'}}>
                     <TableContainer component={Paper} style={{width: '90%'}}>
                         <Table>

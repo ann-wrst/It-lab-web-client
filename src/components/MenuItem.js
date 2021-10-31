@@ -22,6 +22,7 @@ import Button from "@material-ui/core/Button";
 import AddTableModal from "./AddTableModal";
 import {dropDB} from "../services/DatabaseServices";
 import {Link} from 'react-router-dom'
+import ErrorSnackbar from "./ErrorSnackbar";
 
 class MenuItem extends Component {
     constructor(props) {
@@ -33,7 +34,8 @@ class MenuItem extends Component {
             confirmDeleteTableOpen: false,
             db_name: '',
             openAdd: false,
-            table: undefined
+            table: undefined,
+            error: undefined
         }
         this.handleClick = this.handleClick.bind(this);
         this.handleOpenAdd = this.handleOpenAdd.bind(this);
@@ -50,10 +52,12 @@ class MenuItem extends Component {
         await this.fetchTables(db);
     }
 
+    error;
+
     async fetchTables(db) {
         let response = await getTables(db);
         if (!response.success) {
-            //TODO: show error
+            this.error = <ErrorSnackbar open={true} message={response?.error?.message}/>;
         } else
             this.setState({tables: response.data});
     }
@@ -90,7 +94,7 @@ class MenuItem extends Component {
     async deleteDB() {
         let response = await dropDB(this.props.name);
         if (!response.success) {
-            //TODO: show error
+            this.setState({error: <ErrorSnackbar open={true} message={response?.message}/>});
         } else {
             await this.props.fetchDB();
             this.handleDeleteDBClose();
@@ -155,6 +159,7 @@ class MenuItem extends Component {
             {this.state.confirmDeleteTableOpen ? this.renderDeleteTableConfirm() : null}
 
             {this.state.confirmDeleteDBOpen ? this.renderDeleteDBConfirm() : null}
+            {this.state.error}
             <ListItem secondaryAction={<>
                 <IconButton edge="end" aria-label="comments" onClick={this.handleOpenAdd}>
                     <AddBoxOutlinedIcon/>

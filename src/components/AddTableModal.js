@@ -12,6 +12,7 @@ import {FormControl} from "@material-ui/core";
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
+import ErrorSnackbar from "./ErrorSnackbar";
 
 class AddTableModal extends Component {
     constructor(props) {
@@ -23,7 +24,8 @@ class AddTableModal extends Component {
                 column: 'id',
                 type: undefined
             }],
-            columnComponents: []
+            columnComponents: [],
+            error: undefined
         }
         this.handleTypeChange = this.handleTypeChange.bind(this);
     }
@@ -32,11 +34,24 @@ class AddTableModal extends Component {
         this.setState({columnComponents: [this.renderColumn(0)]});
     }
 
+    extractErrorMessage(message) {
+        let mes = '';
+        if (Array.isArray(message.columns)) {
+            for (let m of message.columns) {
+                if(typeof m === 'object' && m !== null) {
+                    const key = Object.keys(m)
+                    mes = `${key} is ${m[key].toLowerCase()}`;
+                }
+            }
+        } else return message;
+        return mes;
+    }
+
     async createTable() {
         const {db} = this.props;
         let response = await createTable(db, this.state.table_name, this.state.columns);
         if (!response.success) {
-            //TODO: show error
+            this.setState({error: <ErrorSnackbar open={true} message={this.extractErrorMessage(response?.message)}/>});
         } else {
             this.handleClose();
             this.props.fetchList();
@@ -135,10 +150,11 @@ class AddTableModal extends Component {
     }
 
     render() {
-        return (<> {
+        return (<> {this.state.error}{
             this.renderCreateTableModal()
         }</>)
     }
+
 }
 
 export default AddTableModal;

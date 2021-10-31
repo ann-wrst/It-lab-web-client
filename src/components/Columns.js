@@ -18,6 +18,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
 import equal from 'fast-deep-equal'
+import ErrorSnackbar from "./ErrorSnackbar";
 
 class Columns extends Component {
     constructor(props) {
@@ -28,7 +29,8 @@ class Columns extends Component {
             open: false,
             newName: undefined,
             database: '',
-            table: ''
+            table: '',
+            error: undefined
         }
 
         this.openRename = this.openRename.bind(this);
@@ -70,13 +72,27 @@ class Columns extends Component {
         });
     };
 
+    extractErrorMessage(message) {
+        let mes = '';
+        if (Array.isArray(message.columns)) {
+            for (let m of message.columns) {
+                if (typeof m === 'object' && m !== null) {
+                    const key = Object.keys(m)
+                    mes = `${key} is ${m[key].toLowerCase()}`;
+                }
+            }
+        } else return message;
+        return mes;
+    }
+
     async renameColumn() {
         let response = await renameColumn(this.state.database, this.state.table, this.columnName, this.state.newName);
         if (response.success) {
             await this.fetchColumns();
             this.handleClose();
         } else {
-        }//TODO: show error
+            this.setState({error: <ErrorSnackbar open={true} message={this.extractErrorMessage(response?.message)}/>});
+        }
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -104,7 +120,7 @@ class Columns extends Component {
     renderRenameDialog() {
         return (<Dialog open={this.state.open} onClose={() => this.handleClose()}>
             <DialogTitle id="form-dialog-title">Rename</DialogTitle>
-            <DialogContent style={{width: '400px', height: '350px'}}>
+            <DialogContent style={{width: '400px', height: '150px'}}>
                 <TextField
                     margin="dense"
                     id="name"
@@ -129,9 +145,10 @@ class Columns extends Component {
     }
 
     render() {
-        return (<div style={{width: '100%', margin:'10px'}} >
+        return (<div style={{width: '100%', margin: '10px'}}>
             {this.renderRenameDialog()}
             <Typography>Columns:</Typography>
+            {this.state.error}
             <div>
                 <Typography>Table: {this.state.table}</Typography>
                 <div style={{display: 'flex', justifyContent: 'center'}}>
